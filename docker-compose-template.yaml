@@ -1,0 +1,42 @@
+version: '3.7'
+
+services:
+  fluentbit:
+    container_name: fluentbit
+    image: fluent/fluent-bit:${VERSION_FLUENT_BIT}
+    deploy:
+      resources:
+        limits:
+          cpus: '0.2'
+          memory: 50M
+        reservations:
+          memory: 10M
+    restart: ${RESTART_POLICY:-always}
+    security_opt:
+      - no-new-privileges:true
+    env_file:
+      - .env
+    volumes:
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
+      - ./conf/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf
+      - ./conf/filter.conf:/fluent-bit/etc/filter.conf
+      - ./conf/parsers.conf:/fluent-bit/etc/parsers.conf
+    ports:
+      - ${PORT_FLUENT_BIT}:24224
+      - ${PORT_FLUENT_BIT}:24224/udp
+      - ${PORT_FLUENT_BIT_MONITOR}:2020
+
+  nginx:
+    image: nginx
+    container_name: webserver
+    restart: unless-stopped
+    logging:
+        driver: fluentd
+        options:
+          fluentd-address: localhost:24224
+          tag: nginx.test.test
+    ports:
+      - 80:80
+    depends_on:
+      - fluentbit
