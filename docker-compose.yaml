@@ -3,7 +3,7 @@ version: '3.7'
 services:
   fluentbit:
     container_name: fluentbit
-    image: fluent/fluent-bit:${VERSION_FLUENT_BIT}
+    image: fluent/fluent-bit:${VERSION_FLUENT_BIT:-latest}
     deploy:
       resources:
         limits:
@@ -23,6 +23,6 @@ services:
       - ./conf/filter.conf:/fluent-bit/etc/filter.conf
       - ./conf/parsers.conf:/fluent-bit/etc/parsers.conf
     ports:
-      - ${PORT_FLUENT_BIT}:24224
-      - ${PORT_FLUENT_BIT}:24224/udp
-      - ${PORT_FLUENT_BIT_MONITOR}:2020
+      - ${PORT_FLUENT_BIT:-24224}:24224
+      - ${PORT_FLUENT_BIT:-24224}:24224/udp
+      - ${PORT_FLUENT_BIT_MONITOR:-2020}:2020
